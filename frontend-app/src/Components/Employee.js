@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Endpoints } from "../Constantes/APIEndpoints";
 import { Variables } from "../Constantes/Variables";
-
+import $ from 'jquery';
 export class Employee extends Component {
 
     constructor(props) {
@@ -16,6 +16,7 @@ export class Employee extends Component {
             DateOfJoining: new Date().toISOString().substr(0, 10),
             PhotoFileName: Variables.DEFAULT_PHOTO_NAME,
             PhotoPath: Endpoints.PHOTO_URL,
+            show: true
         }
     }
     refreshList() {
@@ -108,12 +109,14 @@ export class Employee extends Component {
                     DateOfJoining: Date.stringify,
                     EmployeeName: "",
                     PhotoFileName: Variables.DEFAULT_PHOTO_NAME,
+
                 })
             }, (error) => { alert("Failed") })
     }
 
     updateClicked() {
         const url = Endpoints.API_URL + 'employee/' + this.state.EmployeeId;
+
         fetch(url, {
             method: "PUT",
             headers: {
@@ -130,8 +133,11 @@ export class Employee extends Component {
         })
             .then(res => res.json())
             .then((result) => {
+                this.setState({ show: false })
+                $("#depModal").modal('hide')
                 alert(result)
                 this.refreshList()
+
             }, (error) => { alert("Failed") })
     }
 
@@ -175,9 +181,10 @@ export class Employee extends Component {
             DateOfJoining,
             PhotoFileName,
             PhotoPath,
+            show
         } = this.state;
         return (
-            <div>
+            <>
                 <div className='table-responsive mt-5'>
                     <button type="button" className="btn btn-primary m-2 float-end"
                         data-bs-toggle="modal"
@@ -189,6 +196,7 @@ export class Employee extends Component {
                         <thead>
                             <tr>
                                 <th scope='col'>Employee ID</th>
+                                <th scope='col'>Profil image</th>
                                 <th scope='col'>Employee Name</th>
                                 <th scope='col'>Date of joining</th>
                                 <th scope='col'>Departement</th>
@@ -200,6 +208,10 @@ export class Employee extends Component {
                                 employees.map((employee) => (
                                     <tr key={employee.EmployeeId}>
                                         <th scope='col'>{employee.EmployeeId}</th>
+                                        <td >
+                                            <img width="50px" height="50px"
+                                                src={PhotoPath + employee.PhotoFileName} />
+                                        </td>
                                         <td >{employee.EmployeeName}</td>
                                         <td >{employee.DateOfJoining}</td>
                                         <td >{employee.Departement}</td>
@@ -227,8 +239,6 @@ export class Employee extends Component {
                         </tbody>
                     </table>
                     {
-                        true &&
-
                         <div className="modal fade" id="depModal" tabIndex="-1" aria-hidden="true">
                             <div className="modal-dialog modal-lg modal-dialog-centered">
                                 <div className="modal-content">
@@ -269,18 +279,21 @@ export class Employee extends Component {
                                             </div>
 
                                         </div>
-                                        {EmployeeId === 0 ?
-                                            <button onClick={() => this.createClicked()} type="button" className="btn btn-primary float-start mt-5">Create</button>
-                                            :
-                                            <button onClick={() => this.updateClicked()} type="button" className="btn btn-primary float-start mt-5">Update</button>
-                                        }
+                                        <div className="modal-footer">
+                                            {EmployeeId === 0 ?
+                                                <button onClick={() => this.createClicked()} type="button" data-dismiss="modal" className="btn btn-primary float-start mt-5">Create</button>
+                                                :
+                                                <button onClick={() => this.updateClicked()} type="button" data-dismiss="modal" className="btn btn-primary float-start mt-5">Update</button>
+                                            }
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
-            </div>
+            </>
         );
     }
 }
